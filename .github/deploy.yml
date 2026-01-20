@@ -1,0 +1,39 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script_stop: true
+        script: |
+          cd /var/www/fastapi_app
+
+          # Pull latest changes
+          git pull origin main
+
+          # Navigate to API directory and activate venv
+          cd api
+          source venv/bin/activate
+          source .env
+
+          # Install dependencies
+          pip install -r requirements.txt
+
+          # Restart application
+          sudo /usr/bin/supervisorctl restart fastapi_app
+
+    - name: Verify Deployment
+      run: |
+        sleep 10
+        curl -f --retry 3 --retry-delay 5 http://${{ secrets.EC2_HOST }}/status || exit 1
