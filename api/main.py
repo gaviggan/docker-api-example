@@ -21,7 +21,7 @@ app = FastAPI()
 # This is an endpoint, it doesn't do anything special, but it's an endpoint
 @app.get("/status")
 def get_status():
-    return {"message": "OK"}
+    return {"message": "OKidoki"}
 
 
 # list endpoints
